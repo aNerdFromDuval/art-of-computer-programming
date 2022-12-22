@@ -34,13 +34,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
+      - uses: actions/setup-python@v2
 
-      - name: Run Pyre
-        uses: facebook/pyre-action@60697a7858f7cc8470d8cc494a3cf2ad6b06560d
-        with:
-          # To customize these inputs:
-          # See https://github.com/facebook/pyre-action#inputs
-          repo-directory: './'
-          requirements-path: 'requirements.txt'
+    - name: Install Dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install cython flask flask_cors graphql-core typing_inspect
+        VERSION=$(grep "version" .pyre_configuration | sed -n -e 's/.*\(0\.0\.[0-9]*\).*/\1/p')
+        pip install pyre-check-nightly==$VERSION
+
+    - name: Run Pyre
+      continue-on-error: true
+      run: |
+        pyre --output=sarif check > sarif.json
+
+    - name: Expose SARIF Results
+      uses: actions/upload-artifact@v2
+      with:
+        name: SARIF Results
+        path: sarif.json
+
+    - name: Upload SARIF Results
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: sarif.json
+
+    - name: Fail Command On Errors
+      run: |
+        if [ "$(cat sarif.json | grep 'PYRE-ERROR')" != "" ]; then cat sarif.json && exit 1; fi
