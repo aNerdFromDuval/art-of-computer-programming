@@ -33,3 +33,12 @@ def algorithm_e_recursive(m: int, n: int) -> int:
     if r == 0:
         return n
     return algorithm_e_recursive(n, r)
+
+
+def main() -> None:
+    print(algorithm_e(24, 16))
+    print(algorithm_e_recursive(24, 16))
+
+
+if __name__ == "__main__":
+    main()
