@@ -1,11 +1,5 @@
 # pyre-strict
 
-# Euclid's Algorithm
-# Compute the greatest common divisor of two integers
-#
-# Input: Two integers
-# Output: The greatest common divisor of the two integers
-
 """
 Euclid's Algorithm
 Compute the greatest common divisor of two integers
